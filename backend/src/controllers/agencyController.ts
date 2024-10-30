@@ -48,27 +48,39 @@ export const getAgency = async (req: Request, res: Response) => {
 // };
 
 export const createAgency = async (req: Request, res: Response) => {
-  try {
-      const { name, description, location, teamSize, rating, rate } = req.body; // Make sure to include `rate`
+    try {
+      const { name, description, location, teamSize, rating, rate } = req.body;
       const imagePath = req.file ? req.file.path : '';
-
+  
+      // Log all fields to ensure they are present
+      console.log('Data received:', { name, description, location, teamSize, rating, rate, imagePath });
+  
+      // Check required fields
+      if (!name || !location || !teamSize || !rate) {
+        console.log('Missing required fields:', { name, location, teamSize, rate });
+        return res.status(400).json({ message: 'All required fields must be filled' });
+      }
+  
       const newAgency = new Agency({
-          name,
-          description,
-          location,
-          teamSize,
-          rating,
-          rate, // Include `rate` here
-          image: imagePath,
+        name,
+        description,
+        location,
+        teamSize: Number(teamSize),
+        rating: Number(rating),
+        rate,
+        image: imagePath,
       });
-
+  
       await newAgency.save();
       res.status(201).json(newAgency);
-  } catch (error) {
+    } catch (error) {
       console.error('Error creating agency:', error);
-      res.status(500).json({ message: 'Failed to create agency' });
-  }
-};
+      res.status(500).json({ message: 'Failed to create agency', error });
+    }
+  };
+  
+  
+
 
 export const updateAgency = async (req: Request, res: Response) => {
     try {
@@ -84,12 +96,17 @@ export const updateAgency = async (req: Request, res: Response) => {
 
 export const deleteAgency = async (req: Request, res: Response) => {
     try {
+        console.log('Attempting to delete agency with ID:', req.params.id);
         const deletedAgency = await Agency.findByIdAndDelete(req.params.id);
         if (!deletedAgency) {
+            console.log('Agency not found');
             return res.status(404).json({ message: 'Agency not found' });
         }
+        console.log('Agency deleted successfully');
         res.status(200).json({ message: 'Agency deleted successfully' });
     } catch (error) {
+        console.error('Error in deleteAgency:', error);
         res.status(500).json({ message: 'Failed to delete agency' });
     }
 };
+
