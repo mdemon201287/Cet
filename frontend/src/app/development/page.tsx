@@ -27,6 +27,7 @@ export default function DevelopmentPage() {
       try {
         const response = await fetch('http://localhost:5000/api/agencies');
         const data = await response.json();
+        console.log('Fetched agencies:', data); // Log the data to verify rating values
         setAgencies(data);
       } catch (error) {
         console.error('Error fetching agencies:', error);
@@ -34,9 +35,10 @@ export default function DevelopmentPage() {
         setLoading(false);
       }
     };
-
+  
     fetchAgencies();
   }, []);
+  
 
   if (loading) {
     return <p>Loading agencies...</p>;
@@ -67,10 +69,12 @@ export default function DevelopmentPage() {
                     />
                     <h3 className="text-xl font-semibold mb-2">{agency.name}</h3>
                     <div className="flex items-center mb-2">
-                      {[...Array(agency.rating)].map((_, i) => (
+                      {[...Array(Number.isInteger(agency.rating) ? Math.max(0, Math.min(5, agency.rating)) : 0)].map((_, i) => (
                         <Star key={i} className="w-4 h-4 text-yellow-400" />
                       ))}
                     </div>
+
+
                     <p className="text-sm text-gray-600 mb-4">{agency.description || "Growing Brands Online"}</p>
                     <div className="flex justify-between text-sm text-gray-600">
                       <span>{agency.location}</span>

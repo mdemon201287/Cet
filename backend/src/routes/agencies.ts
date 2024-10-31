@@ -1,45 +1,62 @@
 // src/routes/agencies.ts
 
-
-import express, { Request, Response } from 'express';
-import { getAgencies, getAgency, createAgency, updateAgency, deleteAgency } from '../controllers/agencyController';
+import express from 'express';
 import multer from 'multer';
-import path from 'path';
+import Agency from '../models/Agency';
 
 const router = express.Router();
+const upload = multer({ dest: 'uploads/' }); // Set up storage location for images
 
-// Configure multer to store images
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Make sure the 'uploads' directory exists
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-    },
+// POST: Create a new agency
+router.post('/', upload.single('image'), async (req, res) => {
+  try {
+    const { name, location, teamSize, rate, description, rating } = req.body;
+
+    // Handle image upload
+    let imagePath = '';
+    if (req.file) {
+      imagePath = req.file.path; // Store the image path
+    }
+
+    const newAgency = new Agency({
+      name,
+      location,
+      teamSize, // Keep as string
+      rate,
+      description,
+      image: imagePath,
+      rating: Number(rating) // Ensure rating is a number
+    });
+
+    await newAgency.save();
+    res.status(201).json(newAgency);
+  } catch (error) {
+    console.error('Error creating agency:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 
-const upload = multer({ storage });
-
-// Define routes correctly
-router.get('/', async (req: Request, res: Response) => {
-    await getAgencies(req, res);
+// GET: Fetch all agencies
+router.get('/', async (req, res) => {
+  try {
+    const agencies = await Agency.find();
+    res.json(agencies);
+  } catch (error) {
+    console.error('Error fetching agencies:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 
-router.get('/:id', async (req: Request, res: Response) => {
-    await getAgency(req, res);
-});
-
-// Use multer middleware for file uploads in the create route
-router.post('/', upload.single('image'), async (req: Request, res: Response) => {
-    await createAgency(req, res);
-});
-
-router.put('/:id', async (req: Request, res: Response) => {
-    await updateAgency(req, res);
-});
-
-router.delete('/:id', async (req: Request, res: Response) => {
-    await deleteAgency(req, res);
+// DELETE: Delete an agency by ID
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Agency.findByIdAndDelete(id);
+    res.status(204).send(); // No content to send back
+  } catch (error) {
+    console.error('Error deleting agency:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 
 export default router;

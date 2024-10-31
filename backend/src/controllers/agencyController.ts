@@ -47,40 +47,33 @@ export const getAgency = async (req: Request, res: Response) => {
 //     }
 // };
 
-export const createAgency = async (req: Request, res: Response) => {
-    try {
-      const { name, description, location, teamSize, rating, rate } = req.body;
-      const imagePath = req.file ? req.file.path : '';
-  
-      // Log all fields to ensure they are present
-      console.log('Data received:', { name, description, location, teamSize, rating, rate, imagePath });
-  
-      // Check required fields
-      if (!name || !location || !teamSize || !rate) {
-        console.log('Missing required fields:', { name, location, teamSize, rate });
-        return res.status(400).json({ message: 'All required fields must be filled' });
-      }
-  
-      const newAgency = new Agency({
+const createAgency = async (req: Request, res: Response) => {
+    const { name, description, location, teamSize, rate, rating } = req.body;
+
+    // Validate teamSize to ensure it's a number
+    const parsedTeamSize = Number(teamSize);
+    if (isNaN(parsedTeamSize)) {
+        return res.status(400).json({ message: "teamSize must be a number" });
+    }
+
+    const newAgency = new Agency({
         name,
         description,
         location,
-        teamSize: Number(teamSize),
-        rating: Number(rating),
+        teamSize: parsedTeamSize, // Use parsed number
         rate,
-        image: imagePath,
-      });
-  
-      await newAgency.save();
-      res.status(201).json(newAgency);
-    } catch (error) {
-      console.error('Error creating agency:', error);
-      res.status(500).json({ message: 'Failed to create agency', error });
-    }
-  };
-  
-  
+        rating: Number(rating) || 0,
+        image: req.file ? req.file.path : '', // Use the image path if uploaded
+    });
 
+    try {
+        const savedAgency = await newAgency.save();
+        res.status(201).json(savedAgency);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Failed to create agency" });
+    }
+};
 
 export const updateAgency = async (req: Request, res: Response) => {
     try {
