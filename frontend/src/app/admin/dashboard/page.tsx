@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import AgencyCard from '@/components/AgencyCard'; // Import the AgencyCard component
 
 interface Agency {
   _id: string;
@@ -181,19 +182,16 @@ const AdminDashboard = () => {
       </div>
 
       <h2 className="text-xl font-semibold mb-4">Agencies</h2>
-      <ul className="list-disc pl-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {agencies.map((agency) => (
-          <li key={agency._id} className="flex justify-between items-center mb-2">
-            <span>
-              {agency.name} - {agency.location} - {agency.teamSize} - {agency.rate} - {agency.rating}
-            </span>
-            <div>
-              <button onClick={() => handleEditAgency(agency)} className="ml-2 bg-yellow-600 text-white px-2 py-1 rounded">Edit</button>
-              <button onClick={() => handleDeleteAgency(agency._id)} className="ml-2 bg-red-600 text-white px-2 py-1 rounded">Delete</button>
-            </div>
-          </li>
+          <AgencyCard
+            key={agency._id}
+            agency={agency}
+            onEdit={() => handleEditAgency(agency)}
+            onDelete={() => handleDeleteAgency(agency._id)}
+          />
         ))}
-      </ul>
+      </div>
     </div>
   );
 };

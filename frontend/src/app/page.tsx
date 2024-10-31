@@ -1,21 +1,22 @@
 // src/app/page.tsx
 
-'use client';
+'use client'; // Ensure you're using 'use client' if you are using hooks
 
-import { useState, useEffect } from 'react';
-import HeroSection from '@/components/HeroSection';
+import { useEffect, useState } from 'react';
+import HeroSection from '@/components/HeroSection'; // Make sure to import your components
+import FindandContact from '@/components/FindandContact';
 import IdealProjectPartner from '@/components/IdealProjectPartner';
+import FeaturedAgenciesSection from '@/components/FeaturedAgenciesSection';
 import SlidingLogos from '@/components/SlidingLogos';
 import ClientTestimonials from '@/components/ClientTestimonials';
-import FeaturedAgenciesSection from '@/components/FeaturedAgenciesSection';
-import FindandContact from '@/components/FindandContact';
 
 interface Agency {
   name: string;
   location: string;
   teamSize: string;
   rate: string;
-  image?: string; // optional image field
+  image?: string;
+  rating: number;
 }
 
 const Home = () => {
@@ -23,7 +24,6 @@ const Home = () => {
   const [filteredAgencies, setFilteredAgencies] = useState<Agency[]>([]);
 
   useEffect(() => {
-    // Fetch agencies from your API
     const fetchAgencies = async () => {
       try {
         const response = await fetch('http://localhost:5000/api/agencies');

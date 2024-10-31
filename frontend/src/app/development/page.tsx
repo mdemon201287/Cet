@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Star } from 'lucide-react';
 import FilterSection from '../../components/FilterSection';
+import StarRating from '../../components/StarRating';
 
 interface Agency {
   name: string;
@@ -69,9 +70,7 @@ export default function DevelopmentPage() {
                     />
                     <h3 className="text-xl font-semibold mb-2">{agency.name}</h3>
                     <div className="flex items-center mb-2">
-                      {[...Array(Number.isInteger(agency.rating) ? Math.max(0, Math.min(5, agency.rating)) : 0)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-yellow-400" />
-                      ))}
+                      <StarRating rating={agency.rating} />
                     </div>
 
 
