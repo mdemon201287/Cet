@@ -7,10 +7,10 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 interface Agency {
-  _id: string;  // Update to use _id instead of id
+  _id: string;
   name: string;
   location: string;
-  teamSize: string; // Keep as string
+  teamSize: string;
   rate: string;
   description?: string;
   image?: string;
@@ -26,7 +26,7 @@ const AdminDashboard = () => {
     _id: '',
     name: '',
     location: '',
-    teamSize: '', // Keep as string
+    teamSize: '',
     rate: '',
     description: '',
     image: '',
@@ -39,7 +39,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/admin'); // Redirect to login if not authenticated
+      router.push('/admin');
     } else {
       fetchAgencies();
     }
@@ -51,11 +51,11 @@ const AdminDashboard = () => {
     try {
       const response = await fetch('http://localhost:5000/api/agencies');
       const data = await response.json();
-      setAgencies(data); // Update the agencies state
+      setAgencies(data);
     } catch (error) {
       console.error('Error fetching agencies:', error);
     }
-  };  
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,60 +67,66 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleAddAgency = async () => {
+  const handleAddOrUpdateAgency = async () => {
     const { name, location, teamSize, rate, rating, description } = newAgency;
-  
-    // Validation: Ensure all required fields are filled
+
     if (!name || !location || !teamSize || !rate || rating < 0 || rating > 5) {
       alert("Please fill in all fields and ensure rating is between 0 and 5.");
       return;
     }
-  
-    // Log data to check everything is correct
-    console.log({
-      name,
-      location,
-      teamSize,
-      rate,
-      rating,
-      description,
-      imageFile
-    });
-  
-    // Prepare form data
+
     const formData = new FormData();
     formData.append('name', name);
     formData.append('location', location);
-    formData.append('teamSize', teamSize); // Keep as string
+    formData.append('teamSize', teamSize);
     formData.append('rate', rate);
     formData.append('rating', rating.toString());
     formData.append('description', description || '');
     if (imageFile) formData.append('image', imageFile);
-  
+
     try {
-      const response = await fetch('http://localhost:5000/api/agencies', {
-        method: 'POST',
-        body: formData,
-      });
-  
+      const response = isEditing
+        ? await fetch(`http://localhost:5000/api/agencies/${editingAgencyId}`, {
+            method: 'PUT',
+            body: formData,
+          })
+        : await fetch('http://localhost:5000/api/agencies', {
+            method: 'POST',
+            body: formData,
+          });
+
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Failed to save agency:', errorData);
-        alert(`Failed to save agency: ${errorData.message || 'Unknown error'}`);
+        console.error(`Failed to ${isEditing ? 'update' : 'save'} agency:`, errorData);
+        alert(`Failed to ${isEditing ? 'update' : 'save'} agency: ${errorData.message || 'Unknown error'}`);
         return;
       }
-  
-      console.log('Agency added successfully');
-      fetchAgencies(); // Refresh agency list
-      resetForm(); // Clear form fields
+
+      fetchAgencies();
+      resetForm();
     } catch (error) {
-      console.error('Error adding agency:', error);
-      alert('Error adding agency. Check console for more details.');
+      console.error(`Error ${isEditing ? 'updating' : 'adding'} agency:`, error);
+      alert('Error saving agency. Check console for more details.');
     }
   };
-  
+
+  const handleEditAgency = (agency: Agency) => {
+    setNewAgency({
+      _id: agency._id,
+      name: agency.name,
+      location: agency.location,
+      teamSize: agency.teamSize,
+      rate: agency.rate,
+      description: agency.description || '',
+      image: agency.image || '',
+      rating: agency.rating,
+    });
+    setIsEditing(true);
+    setEditingAgencyId(agency._id);
+    setImagePreview(agency.image || null);
+  };
+
   const handleDeleteAgency = async (id: string) => {
-    console.log(`Trying to delete agency with ID: ${id}`);
     try {
       const response = await fetch(`http://localhost:5000/api/agencies/${id}`, {
         method: 'DELETE',
@@ -128,15 +134,13 @@ const AdminDashboard = () => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
         alert(`Failed to delete agency: ${errorText}`);
         return;
       }
 
-      console.log('Delete successful');
       setAgencies(agencies.filter((agency) => agency._id !== id));
     } catch (error) {
-      console.error('Fetch error:', error);
+      console.error('Error deleting agency:', error);
       alert('Failed to delete agency');
     }
   };
@@ -146,7 +150,7 @@ const AdminDashboard = () => {
       _id: '',
       name: '',
       location: '',
-      teamSize: '', // Keep as string
+      teamSize: '',
       rate: '',
       description: '',
       image: '',
@@ -155,6 +159,7 @@ const AdminDashboard = () => {
     setImageFile(null);
     setImagePreview(null);
     setIsEditing(false);
+    setEditingAgencyId(null);
   };
 
   return (
@@ -172,15 +177,20 @@ const AdminDashboard = () => {
         <textarea placeholder="Description" value={newAgency.description} onChange={(e) => setNewAgency({ ...newAgency, description: e.target.value })} className="w-full p-2 border rounded mb-4"></textarea>
         <input type="file" accept="image/*" onChange={handleImageUpload} className="mb-4" />
         {imagePreview && <img src={imagePreview} alt="Preview" className="mb-4" style={{ maxWidth: '200px' }} />}
-        <button onClick={handleAddAgency} className="bg-blue-600 text-white px-4 py-2 rounded">{isEditing ? 'Update Agency' : 'Add Agency'}</button>
+        <button onClick={handleAddOrUpdateAgency} className="bg-blue-600 text-white px-4 py-2 rounded">{isEditing ? 'Update Agency' : 'Add Agency'}</button>
       </div>
 
       <h2 className="text-xl font-semibold mb-4">Agencies</h2>
       <ul className="list-disc pl-5">
         {agencies.map((agency) => (
           <li key={agency._id} className="flex justify-between items-center mb-2">
-            <span>{agency.name} - {agency.location} - {agency.teamSize} - {agency.rate} - {agency.rating}</span>
-            <button onClick={() => handleDeleteAgency(agency._id)} className="ml-2 bg-red-600 text-white px-2 py-1 rounded">Delete</button>
+            <span>
+              {agency.name} - {agency.location} - {agency.teamSize} - {agency.rate} - {agency.rating}
+            </span>
+            <div>
+              <button onClick={() => handleEditAgency(agency)} className="ml-2 bg-yellow-600 text-white px-2 py-1 rounded">Edit</button>
+              <button onClick={() => handleDeleteAgency(agency._id)} className="ml-2 bg-red-600 text-white px-2 py-1 rounded">Delete</button>
+            </div>
           </li>
         ))}
       </ul>

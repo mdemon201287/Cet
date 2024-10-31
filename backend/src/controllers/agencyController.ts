@@ -76,13 +76,39 @@ const createAgency = async (req: Request, res: Response) => {
 };
 
 export const updateAgency = async (req: Request, res: Response) => {
+    const { name, description, location, teamSize, rate, rating } = req.body;
+
+    // Validate and parse fields as needed
+    const updateFields: any = {
+        name,
+        description,
+        location,
+        rate,
+        rating: Number(rating) || 0,
+    };
+
+    // Parse teamSize if provided
+    if (teamSize !== undefined) {
+        const parsedTeamSize = Number(teamSize);
+        if (isNaN(parsedTeamSize)) {
+            return res.status(400).json({ message: "teamSize must be a number" });
+        }
+        updateFields.teamSize = parsedTeamSize;
+    }
+
+    // Include image path if a new file is uploaded
+    if (req.file) {
+        updateFields.image = req.file.path;
+    }
+
     try {
-        const updatedAgency = await Agency.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updatedAgency = await Agency.findByIdAndUpdate(req.params.id, updateFields, { new: true });
         if (!updatedAgency) {
             return res.status(404).json({ message: 'Agency not found' });
         }
         res.status(200).json(updatedAgency);
     } catch (error) {
+        console.error('Error updating agency:', error);
         res.status(500).json({ message: 'Failed to update agency' });
     }
 };
