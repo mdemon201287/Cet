@@ -5,7 +5,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IAgency extends Document {
   name: string;
   location: string;
-  teamSize: string; // Keep as string
+  teamSize: string;
   rate: string;
   description?: string;
   image?: string;
@@ -15,7 +15,7 @@ export interface IAgency extends Document {
 const agencySchema: Schema = new Schema({
   name: { type: String, required: true },
   location: { type: String, required: true },
-  teamSize: { type: String, required: true }, // Ensure this is a string
+  teamSize: { type: String, required: true },
   rate: { type: String, required: true },
   description: { type: String },
   image: { type: String },
@@ -25,4 +25,3 @@ const agencySchema: Schema = new Schema({
 const Agency = mongoose.model<IAgency>('Agency', agencySchema);
 
 export default Agency;
-
