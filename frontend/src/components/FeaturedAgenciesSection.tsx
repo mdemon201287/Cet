@@ -1,19 +1,10 @@
-// frontend/src/components/FeaturedAgenciesSection.tsx
-
+// src/components/FeaturedAgenciesSection.tsx
 'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
 import StarRating from './StarRating'; // Import StarRating component
-
-interface Agency {
-  name: string;
-  location: string;
-  teamSize: string;
-  rate: string;
-  image?: string;
-  rating: number; // Add rating field here
-}
+import { Agency } from '../../../backend/src/types/Agency'; // Adjust the import path as necessary
 
 interface FeaturedAgenciesSectionProps {
   agencies: Agency[];
@@ -26,7 +17,7 @@ export default function FeaturedAgenciesSection({ agencies }: FeaturedAgenciesSe
         <h2 className="text-3xl font-bold mb-8">Featured Agencies</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {agencies.map((agency) => (
-            <Link key={agency.name} href={`/${agency.name.toLowerCase().replace(/\s+/g, '-')}`}>
+            <Link key={agency._id} href={`/development/${agency._id}`}>
               <div className="bg-white p-6 rounded-lg shadow-lg cursor-pointer">
                 {agency.image && (
                   <Image
@@ -38,10 +29,7 @@ export default function FeaturedAgenciesSection({ agencies }: FeaturedAgenciesSe
                   />
                 )}
                 <h3 className="text-xl font-semibold mb-2">{agency.name}</h3>
-
-                {/* Display star rating */}
                 <StarRating rating={agency.rating} />
-
                 <p className="text-sm text-gray-600 mb-4">Growing Brands Online</p>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>{agency.location}</span>

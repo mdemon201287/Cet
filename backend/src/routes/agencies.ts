@@ -10,7 +10,7 @@ const upload = multer({ dest: 'uploads/' }); // Set up storage location for imag
 // POST: Create a new agency
 router.post('/', upload.single('image'), async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, location, teamSize, rate, description, rating } = req.body;
+    const { name, location, teamSize, rate, description, rating, featured } = req.body;
     let imagePath = '';
     if (req.file) {
       imagePath = req.file.path; // Store the image path
@@ -24,6 +24,7 @@ router.post('/', upload.single('image'), async (req: Request, res: Response): Pr
       description,
       image: imagePath,
       rating: Number(rating), // Ensure rating is a number
+      featured: featured === 'true', // Handle featured flag
     });
 
     await newAgency.save();
@@ -43,6 +44,7 @@ router.put('/:id', upload.single('image'), async (req: Request, res: Response): 
       ...req.body,
       teamSize: Number(req.body.teamSize), // Ensure teamSize is a number
       rating: Number(req.body.rating), // Ensure rating is a number
+      featured: req.body.featured === 'true', // Handle featured flag
     };
 
     if (req.file) {
@@ -84,6 +86,17 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
     res.json(agency); // Send the response
   } catch (error) {
     console.error('Error fetching agency:', error);
+    res.status(500).json({ message: 'Internal Server Error' }); // Send the response
+  }
+});
+
+// GET: Fetch featured agencies
+router.get('/featured', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const featuredAgencies = await Agency.find({ featured: true });
+    res.json(featuredAgencies); // Send the response
+  } catch (error) {
+    console.error('Error fetching featured agencies:', error);
     res.status(500).json({ message: 'Internal Server Error' }); // Send the response
   }
 });

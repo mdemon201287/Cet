@@ -1,23 +1,14 @@
 // src/app/page.tsx
-
-'use client'; // Ensure you're using 'use client' if you are using hooks
+'use client';
 
 import { useEffect, useState } from 'react';
-import HeroSection from '@/components/HeroSection'; // Make sure to import your components
+import HeroSection from '@/components/HeroSection';
 import FindandContact from '@/components/FindandContact';
 import IdealProjectPartner from '@/components/IdealProjectPartner';
 import FeaturedAgenciesSection from '@/components/FeaturedAgenciesSection';
 import SlidingLogos from '@/components/SlidingLogos';
 import ClientTestimonials from '@/components/ClientTestimonials';
-
-interface Agency {
-  name: string;
-  location: string;
-  teamSize: string;
-  rate: string;
-  image?: string;
-  rating: number;
-}
+import { Agency } from '../../../backend/src/types/Agency'; // Import Agency type here
 
 const Home = () => {
   const [agencies, setAgencies] = useState<Agency[]>([]);
