@@ -1,4 +1,5 @@
 // src/app/page.tsx
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,7 +9,7 @@ import IdealProjectPartner from '@/components/IdealProjectPartner';
 import FeaturedAgenciesSection from '@/components/FeaturedAgenciesSection';
 import SlidingLogos from '@/components/SlidingLogos';
 import ClientTestimonials from '@/components/ClientTestimonials';
-import { Agency } from '../../../backend/src/types/Agency'; // Import Agency type here
+import { Agency } from '../../../backend/src/types/Agency';
 
 const Home = () => {
   const [agencies, setAgencies] = useState<Agency[]>([]);
@@ -35,8 +36,8 @@ const Home = () => {
 
     const matchingAgencies = agencies.filter(
       (agency) =>
-        agency.name.toLowerCase().includes(formattedSearchQuery) &&
-        agency.location.toLowerCase().includes(formattedLocationQuery)
+        agency.name.toLowerCase().startsWith(formattedSearchQuery) && // Match product name by first character
+        agency.location.toLowerCase().startsWith(formattedLocationQuery) // Match location by first character
     );
 
     setFilteredAgencies(matchingAgencies);
