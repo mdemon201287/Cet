@@ -10,6 +10,7 @@ export interface IAgency extends Document {
   description?: string;
   image?: string;
   rating: number;
+  categotry: string;
 }
 
 const agencySchema: Schema = new Schema({
@@ -19,7 +20,8 @@ const agencySchema: Schema = new Schema({
   rate: { type: String, required: true },
   description: { type: String },
   image: { type: String },
-  rating: { type: Number, min: 0, max: 5, required: true }
+  rating: { type: Number, min: 0, max: 5, required: true },
+  category: { type: String, required: true }
 });
 
 const Agency = mongoose.model<IAgency>('Agency', agencySchema);

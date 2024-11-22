@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import FilterSection from '../../components/FilterSection';
 import StarRating from '../../components/StarRating';
 
 interface Agency {
@@ -19,11 +20,12 @@ interface Agency {
   category: string;
 }
 
-export default function DevelopmentPage() {
+export default function AgencyPage() {
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [filteredAgencies, setFilteredAgencies] = useState<Agency[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [title, setTitle] = useState(''); // Title state for the page
 
   useEffect(() => {
     const fetchAgencies = async () => {
@@ -33,12 +35,8 @@ export default function DevelopmentPage() {
           throw new Error('Failed to fetch agencies');
         }
         const data = await response.json();
-        
-        // Filter agencies by "Development" category on initial load
-        const developmentAgencies = data.filter((agency: Agency) => agency.category === 'Development');
-        
-        setAgencies(developmentAgencies);
-        setFilteredAgencies(developmentAgencies);
+        setAgencies(data);
+        setFilteredAgencies(data);
       } catch (error) {
         console.error('Error fetching agencies:', error);
         setError('Could not load agencies. Please try again later.');
@@ -49,6 +47,48 @@ export default function DevelopmentPage() {
 
     fetchAgencies();
   }, []);
+
+  const applyFilters = (filters: { location?: string; teamSize?: string; rate?: string; category?: string }) => {
+    console.log("Filters applied:", filters); // Debug: Log the selected filters
+
+    // Determine the title based on the category filter
+    if (filters.category === 'Development') {
+      setTitle('Development Agencies'); // Show title when "Development" is selected
+    } else {
+      setTitle(''); // Blank title when "All" or other categories are selected
+    }
+
+    // Apply the filters to get the matching agencies
+    const filtered = agencies.filter((agency) => {
+      const matchesLocation = filters.location ? agency.location.toLowerCase().startsWith(filters.location.toLowerCase()) : true;
+
+      // Only include "Development" agencies if "All" or "Development" is selected
+      const matchesCategory = (filters.category === 'All' || filters.category === 'Development')
+        ? agency.category === 'Development'
+        : filters.category
+        ? agency.category === filters.category
+        : true;
+
+      const matchesRate = filters.rate === 'Any Price' || !filters.rate
+        ? true
+        : parseInt(agency.rate) <= parseInt(filters.rate.replace(/\D/g, '') || "0");
+
+      // Handle Team Size range filtering
+      const agencyTeamSize = parseInt(agency.teamSize, 10);
+      const [minSize, maxSize] = filters.teamSize?.split('-').map(Number) || [];
+      const matchesTeamSize = filters.teamSize
+        ? agencyTeamSize >= (minSize || 0) && agencyTeamSize <= (maxSize || Infinity)
+        : true;
+
+      // Debug: Log the matching result for each agency
+      console.log(`Agency: ${agency.name}, Matches Category: ${matchesCategory}, Matches All: ${matchesLocation && matchesCategory && matchesRate && matchesTeamSize}`);
+
+      return matchesLocation && matchesCategory && matchesRate && matchesTeamSize;
+    });
+
+    setFilteredAgencies(filtered);
+    console.log("Filtered Agencies:", filtered); // Debug: Log the filtered agencies
+  };
 
   if (loading) {
     return <p className="text-center">Loading agencies...</p>;
@@ -63,10 +103,15 @@ export default function DevelopmentPage() {
       <div className="container mx-auto">
         <div className="flex flex-col lg:flex-row">
           <div className="w-full lg:w-1/4 mb-8 lg:mb-0">
-            {/* Optional: Add filter section if needed */}
+            <FilterSection
+              onFilterChange={applyFilters}
+              totalItems={agencies.length}
+              filteredItemsCount={filteredAgencies.length}
+            />
           </div>
           <div className="w-full lg:w-3/4">
-            <h2 className="text-3xl font-bold mb-8">Development Agencies</h2>
+            {/* Conditionally render the title based on the selected filter */}
+            {title && <h2 className="text-3xl font-bold mb-8">{title}</h2>}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredAgencies.length > 0 ? (
                 filteredAgencies.map((agency) => (
@@ -100,7 +145,7 @@ export default function DevelopmentPage() {
                   </Link>
                 ))
               ) : (
-                <p className="text-center text-gray-500 col-span-full">No development agencies found.</p>
+                <p className="text-center text-gray-500 col-span-full">No agencies found for the selected filters.</p>
               )}
             </div>
           </div>

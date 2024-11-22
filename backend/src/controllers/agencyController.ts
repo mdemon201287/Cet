@@ -24,31 +24,8 @@ export const getAgency = async (req: Request, res: Response) => {
     }
 };
 
-// export const createAgency = async (req: Request, res: Response) => {
-//     try {
-//         const { name, description, location, rate, teamSize, rating } = req.body;
-//         const imagePath = req.file ? req.file.path : ''; // Get image path from multer
-
-//         const newAgency = new Agency({
-//             name,
-//             description,
-//             location,
-//             teamSize,
-//             rate,
-//             rating,
-//             image: imagePath, // Save image path to the database
-//         });
-
-//         await newAgency.save();
-//         res.status(201).json(newAgency);
-//     } catch (error) {
-//         console.error('Error creating agency:', error); // Log the error for debugging
-//         res.status(500).json({ message: 'Failed to create agency' });
-//     }
-// };
-
 const createAgency = async (req: Request, res: Response) => {
-    const { name, description, location, teamSize, rate, rating } = req.body;
+    const { name, category, description, location, teamSize, rate, rating } = req.body;
 
     // Validate teamSize to ensure it's a number
     const parsedTeamSize = Number(teamSize);
@@ -58,6 +35,7 @@ const createAgency = async (req: Request, res: Response) => {
 
     const newAgency = new Agency({
         name,
+        category,
         description,
         location,
         teamSize: parsedTeamSize, // Use parsed number
@@ -76,11 +54,12 @@ const createAgency = async (req: Request, res: Response) => {
 };
 
 export const updateAgency = async (req: Request, res: Response) => {
-    const { name, description, location, teamSize, rate, rating } = req.body;
+    const { name, category, description, location, teamSize, rate, rating } = req.body;
 
     // Validate and parse fields as needed
     const updateFields: any = {
         name,
+        category,
         description,
         location,
         rate,

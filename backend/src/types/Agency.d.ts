@@ -9,4 +9,5 @@ export interface Agency {
   description?: string; // Optional if not all agencies have descriptions
   image?: string; // Optional if not all agencies have images
   rating: number;
+  category: string;
 }

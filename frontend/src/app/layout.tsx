@@ -25,6 +25,7 @@ export default function RootLayout({
               <Image src="/images/logo.png" alt="Best Dev Shop Logo" width={150} height={50} />
             </Link>
             <nav className="space-x-4">
+              <Link href="/agencies">Agencies</Link>
               <Link href="/development">Development</Link>
               <Link href="/it-services">IT Services</Link>
               <Link href="/marketing">Marketing</Link>

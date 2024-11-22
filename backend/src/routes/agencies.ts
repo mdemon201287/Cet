@@ -10,7 +10,7 @@ const upload = multer({ dest: 'uploads/' }); // Set up storage location for imag
 // POST: Create a new agency
 router.post('/', upload.single('image'), async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, location, teamSize, rate, description, rating, featured } = req.body;
+    const { name, category, location, teamSize, rate, description, rating, featured } = req.body;
     let imagePath = '';
     if (req.file) {
       imagePath = req.file.path; // Store the image path
@@ -18,6 +18,7 @@ router.post('/', upload.single('image'), async (req: Request, res: Response): Pr
 
     const newAgency: IAgency = new Agency({
       name,
+      category,
       location,
       teamSize: Number(teamSize), // Ensure teamSize is a number
       rate,
@@ -25,6 +26,7 @@ router.post('/', upload.single('image'), async (req: Request, res: Response): Pr
       image: imagePath,
       rating: Number(rating), // Ensure rating is a number
       featured: featured === 'true', // Handle featured flag
+      
     });
 
     await newAgency.save();
