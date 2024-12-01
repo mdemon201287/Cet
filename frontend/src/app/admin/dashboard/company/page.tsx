@@ -1,4 +1,4 @@
-// frontend/src/app/admin/dashboard/page.tsx
+// frontend/src/app/admin/dashboard/company/page.tsx
 
 'use client';
 
@@ -21,7 +21,7 @@ interface Agency {
   description?: string;
 }
 
-const AdminDashboard = () => {
+const AdminCompanyDashboard = () => {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -352,4 +352,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default AdminCompanyDashboard;
