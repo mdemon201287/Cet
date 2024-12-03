@@ -1,45 +1,40 @@
-// src/components/Navbar.tsx
+import { useState, useEffect } from "react";
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+interface Category {
+  _id: string;
+  name: string;
+}
 
-const Navbar = () => {
-  const [categories, setCategories] = useState<string[]>([]);
-  const [subCategories, setSubCategories] = useState<{ [key: string]: string[] }>({});
+const Navbar: React.FC = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/categories");
+      if (response.ok) {
+        const data: Category[] = await response.json();
+        setCategories(data);
+      } else {
+        console.error("Failed to fetch categories");
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   useEffect(() => {
-    // Fetch categories
-    fetch('/api/agencies/categories')
-      .then((response) => response.json())
-      .then((data) => setCategories(data));
-
-    // Fetch subcategories for each category
-    categories.forEach((category) => {
-      fetch(`/api/agencies/subcategories/${category}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setSubCategories((prev) => ({ ...prev, [category]: data }));
-        });
-    });
-  }, [categories]);
+    fetchCategories();
+  }, []);
 
   return (
-    <nav className="bg-gray-800 text-white p-4">
+    <nav className="flex items-center justify-between px-4 py-2 bg-gray-200">
+      <div className="font-bold text-lg">BestDevShop</div>
       <ul className="flex space-x-4">
         {categories.map((category) => (
-          <li key={category} className="relative group">
-            <span className="cursor-pointer">{category}</span>
-            {subCategories[category] && subCategories[category].length > 0 && (
-              <ul className="absolute left-0 bg-white text-black mt-2 shadow-lg hidden group-hover:block">
-                {subCategories[category].map((subCategory) => (
-                  <li key={subCategory} className="px-4 py-2">
-                    <Link href={`/subcategory/${category}/${subCategory}`}>
-                      {subCategory}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <li key={category._id} className="relative group">
+            <button className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-300">
+              {category.name}
+            </button>
           </li>
         ))}
       </ul>
